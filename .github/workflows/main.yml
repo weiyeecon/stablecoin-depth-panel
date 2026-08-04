@@ -1,0 +1,58 @@
+name: daily-depth-snapshot
+
+on:
+  schedule:
+    - cron: "41 5 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: depth-snapshot
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install -r requirements.txt
+
+      - name: Collect snapshot
+        env:
+          CG_DEMO_KEY: ${{ secrets.CG_DEMO_KEY }}
+        run: python collect_snapshot.py
+
+      - name: Collect native L2 books
+        if: always()
+        continue-on-error: true
+        run: python collect_exact_l2.py
+
+      - name: Commit snapshot
+        if: always()
+        run: |
+          git config user.name "depth-collector"
+          git config user.email "depth-collector@users.noreply.github.com"
+          git add -A data panel || true
+          if git diff --cached --quiet; then
+            echo "nothing to commit"
+            exit 0
+          fi
+          git commit -m "depth snapshot $(date -u +%F) [skip ci]"
+          for attempt in 1 2 3; do
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || true
+            if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+              echo "pushed on attempt ${attempt}"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "push failed after 3 attempts"
+          exit 1
