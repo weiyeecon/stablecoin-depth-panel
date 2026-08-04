@@ -20,6 +20,7 @@ rebuilds the panel. Idempotent per day (rerun exits unless --force).
 Env: CG_DEMO_KEY (optional, free CoinGecko demo key; cuts runtime ~5x).
 """
 import argparse
+import glob
 import hashlib
 import json
 import os
@@ -94,9 +95,17 @@ def main():
     day = args.date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
     snap_dir = os.path.join(HERE, "data", "snapshots", day)
     manifest_path = os.path.join(snap_dir, "manifest.json")
-    if os.path.exists(manifest_path) and not args.force:
-        print(f"snapshot {day} already collected; use --force to redo")
+    # "Already collected" must mean "successfully collected": a manifest with
+    # no archived CSV is residue from a failed run and must not suppress a retry.
+    archived = glob.glob(os.path.join(snap_dir, "*.csv"))
+    if os.path.exists(manifest_path) and archived and not args.force:
+        print(f"snapshot {day} already collected ({len(archived)} csv); "
+              f"use --force to redo")
         return
+    if os.path.exists(manifest_path) and not archived:
+        print(f"snapshot {day} has a manifest but no data; discarding residue "
+              f"and re-collecting")
+        shutil.rmtree(snap_dir, ignore_errors=True)
 
     preflight()
     bootstrap_seed()
