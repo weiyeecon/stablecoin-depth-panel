@@ -190,6 +190,12 @@ def main():
         manifest_path = os.path.join(directory, "manifest.json")
         if not os.path.exists(manifest_path):
             continue
+        # Skip a date that archived no CSV at all (e.g. a failed collection
+        # committed before the empty-snapshot guard existed): it would enter
+        # the panel as a phantom date with every cell unobserved.
+        if not glob.glob(os.path.join(directory, "*.csv")):
+            print(f"  skipping {day}: manifest present but no CSV archived")
+            continue
         with open(manifest_path, encoding="utf-8") as f:
             manifests[day] = json.load(f)
         days.append(day)

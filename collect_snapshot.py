@@ -31,6 +31,19 @@ from datetime import datetime, timezone
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 VEND = HERE
+PULLER_L1 = "puller_layer1.py"    # tokenized local-currency coins (Layer 1)
+PULLER_L2 = "puller_layer2.py"    # USDT/USDC books quoted in EM fiat (Layer 2)
+
+
+def preflight():
+    """Fail immediately and clearly if a referenced script is missing, rather
+    than letting the subprocess die with a bare 'can't open file'."""
+    missing = [s for s in (PULLER_L1, PULLER_L2, "build_panel.py")
+               if not os.path.exists(os.path.join(HERE, s))]
+    if missing:
+        sys.exit("PREFLIGHT FAILED: missing files in the repository root: "
+                 + ", ".join(missing)
+                 + "\nUpload the complete flat package (all 16 files).")
 
 
 def sha256(path):
@@ -85,6 +98,7 @@ def main():
         print(f"snapshot {day} already collected; use --force to redo")
         return
 
+    preflight()
     bootstrap_seed()
     key = os.environ.get("CG_DEMO_KEY") or None
     work = os.path.join(HERE, "data", "_work", day)
@@ -93,9 +107,9 @@ def main():
 
     runs = []
     if not args.skip_layer2:
-        runs.append(run_puller("coingecko_fiat_pairs.py", work, key))
+        runs.append(run_puller(PULLER_L2, work, key))
     if not args.skip_layer1:
-        runs.append(run_puller("coingecko_puller.py", work, key,
+        runs.append(run_puller(PULLER_L1, work, key,
                                extra=("--skip-chart",)))
     fails = [r for r in runs if r["returncode"] != 0]
 
@@ -112,6 +126,15 @@ def main():
             line_count = sum(1 for _ in open(dst, encoding="utf-8"))
             files[fn] = {"sha256": sha256(dst), "bytes": os.path.getsize(dst),
                          "rows": max(0, line_count - (1 if fn.endswith('.csv') else 0))}
+    if not files:
+        # nothing collected: remove the empty dir so the panel gets no phantom
+        # date, still rebuild the panel from prior days, then report failure.
+        shutil.rmtree(snap_dir, ignore_errors=True)
+        shutil.rmtree(work, ignore_errors=True)
+        subprocess.run([sys.executable, os.path.join(HERE, "build_panel.py")],
+                       cwd=HERE)
+        sys.exit(f"collection produced no files; runs={runs}")
+
     manifest = {"date": day,
                 "collected_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                 "keyed": bool(key), "runs": runs, "files": files,
