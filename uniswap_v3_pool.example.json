@@ -1,0 +1,21 @@
+{
+  "pool_id": "replace-with-pool-id",
+  "pool_type": "uniswap_v3",
+  "chain_id": 1,
+  "pool_address": "0xREPLACE",
+  "corridor": "BRL",
+  "stablecoin": "USDC",
+  "block_number": 0,
+  "snapshot_utc": "REPLACE",
+  "token0": "USDC",
+  "token1": "BRZ",
+  "decimals0": 6,
+  "decimals1": 18,
+  "stablecoin_token": 0,
+  "fee_bps": 30,
+  "sqrt_price_x96": "REPLACE",
+  "liquidity": "REPLACE",
+  "ticks": [
+    {"tick": -100, "sqrt_price_x96": "REPLACE", "liquidity_net": "REPLACE"}
+  ]
+}

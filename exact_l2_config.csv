@@ -1,0 +1,7 @@
+venue,pair,corridor,stablecoin,stablecoin_side,enabled,limit,note
+binance,USDTTRY,TRY,USDT,base,true,5000,Observed in CoinGecko seed; verify native symbol before formal run
+binance,USDTBRL,BRL,USDT,base,true,5000,Observed in CoinGecko seed; verify native symbol before formal run
+binance,USDTIDR,IDR,USDT,base,true,5000,Observed in CoinGecko seed; verify native symbol before formal run
+valr,USDTZAR,ZAR,USDT,base,true,1000,Observed in CoinGecko seed
+bitkub,usdt_thb,THB,USDT,base,true,1000,Observed in CoinGecko seed
+bitso,usdt_mxn,MXN,USDT,base,false,0,Optional sixth corridor; enable after confirming the book

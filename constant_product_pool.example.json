@@ -1,0 +1,13 @@
+{
+  "pool_id": "replace-with-pool-id",
+  "pool_type": "constant_product",
+  "chain_id": 1,
+  "pool_address": "0xREPLACE",
+  "corridor": "BRL",
+  "stablecoin": "USDC",
+  "block_number": 0,
+  "snapshot_utc": "REPLACE",
+  "reserve_stablecoin": 1000000,
+  "reserve_local_token": 5000000,
+  "fee_bps": 30
+}

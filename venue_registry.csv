@@ -1,0 +1,23 @@
+market_identifier,venue_type,note
+uniswap_v2,dex,explicit registry
+uniswap_v3,dex,explicit registry
+pancakeswap_new,dex,explicit registry
+curve,dex,explicit registry
+balancer,dex,explicit registry
+aerodrome,dex,explicit registry
+quickswap,dex,explicit registry
+sushiswap,dex,explicit registry
+raydium2,dex,explicit registry
+orca,dex,explicit registry
+binance,cex,explicit registry
+okex,cex,explicit registry
+bybit_spot,cex,explicit registry
+gdax,cex,explicit registry
+kraken,cex,explicit registry
+kucoin,cex,explicit registry
+bitget,cex,explicit registry
+valr,cex,explicit registry
+indodax,cex,explicit registry
+btcturk,cex,explicit registry
+bitkub,cex,explicit registry
+bitso,cex,explicit registry

@@ -1,0 +1,23 @@
+corridor,country,benchmark
+NGN,Nigeria,false
+MXN,Mexico,false
+BRL,Brazil,false
+TRY,Turkey,false
+ZAR,South Africa,false
+IDR,Indonesia,false
+COP,Colombia,false
+ARS,Argentina,false
+KES,Kenya,false
+PHP,Philippines,false
+THB,Thailand,false
+GHS,Ghana,false
+PEN,Peru,false
+CLP,Chile,false
+VND,Vietnam,false
+PKR,Pakistan,false
+EGP,Egypt,false
+UAH,Ukraine,false
+INR,India,false
+MYR,Malaysia,false
+EUR,Euro area,true
+SGD,Singapore,true

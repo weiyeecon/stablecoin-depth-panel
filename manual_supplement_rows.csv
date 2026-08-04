@@ -1,0 +1,4 @@
+date,base_coin,base,target,market_name,market_identifier,converted_volume_usd,bid_ask_spread_pct,cost_to_move_up_usd,cost_to_move_down_usd,trust_score,is_stale,is_anomaly,last_traded_at,snapshot_utc,manual_supplement
+2026-07-08,tether,USDT,MXN,Bitso,bitso,2523161,0.01,283800.0,375642.0,,False,False,2026-07-07,2026-07-07 (manual web verification),True
+2026-07-08,tether,USDT,BRL,Bitso,bitso,1430756,0.03,119736.0,77852.0,,False,False,2026-07-07,2026-07-07 (manual web verification),True
+2026-07-08,tether,USDT,ARS,Bitso,bitso,1039287,0.05,72484.0,121048.0,,False,False,2026-07-07,2026-07-07 (manual web verification),True
