@@ -1,0 +1,26 @@
+{
+  "date": "2026-08-04",
+  "collected_utc": "2026-08-04T05:14:05+00:00",
+  "keyed": true,
+  "runs": [
+    {
+      "script": "coingecko_fiat_pairs.py",
+      "returncode": 2,
+      "seconds": 0.0
+    },
+    {
+      "script": "coingecko_puller.py",
+      "returncode": 2,
+      "seconds": 0.0
+    }
+  ],
+  "files": {},
+  "code_sha256": {
+    "collect_snapshot.py": "8c31a4ddde6d44b513f52cc9fa1fde283248c55a5e60d1c0abf2fc5e75f38669",
+    "build_panel.py": "e52abde9e07988fb1e162d16e8ab5266009b44ce310c827ac1fabb130242127d",
+    "puller_layer1.py": "43e9cbc5d14c884bb4751ba64efa86553d02ea23a47a037b7f024e66b400484a",
+    "puller_layer2.py": "c29309531f9598fe9323989a26e5305a993ecd55aa62f4d18648199846fa0bbf",
+    "corridors.csv": "1906fddefe8c7ee3e15982bd20be1df3d980568e696aab4f3c14ca6563f2c818",
+    "venue_registry.csv": "e73d02dd6d24b1f7eca52183f4e20148bfba4aef9e04850015a84130c26e7d9d"
+  }
+}

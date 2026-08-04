@@ -1,0 +1,9 @@
+{
+  "date": "2026-07-08",
+  "note": "seed snapshot from the paper replication package (manual Bitso rows included); bootstrapped from the flat layout on first run",
+  "files": {
+    "cg_fiat_pairs_depth.csv": {
+      "sha256": "dc1554cf630e776c5878bf0d207dfa5c6c48ae3d76395f852d9f8f7b02c2364e"
+    }
+  }
+}
