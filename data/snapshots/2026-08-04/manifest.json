@@ -1,23 +1,49 @@
 {
   "date": "2026-08-04",
-  "collected_utc": "2026-08-04T05:14:05+00:00",
+  "collected_utc": "2026-08-04T05:50:20+00:00",
   "keyed": true,
   "runs": [
     {
-      "script": "coingecko_fiat_pairs.py",
-      "returncode": 2,
-      "seconds": 0.0
+      "script": "puller_layer2.py",
+      "returncode": 0,
+      "seconds": 458.2
     },
     {
-      "script": "coingecko_puller.py",
-      "returncode": 2,
-      "seconds": 0.0
+      "script": "puller_layer1.py",
+      "returncode": 0,
+      "seconds": 109.7
     }
   ],
-  "files": {},
+  "files": {
+    "cg_fiat_pairs_depth.csv": {
+      "sha256": "d20b83cd475f34b4974fd2f8df351a81651fdc956668da0ec27ba99254f37167",
+      "bytes": 15656,
+      "rows": 106
+    },
+    "cg_markets.csv": {
+      "sha256": "e3e3bdf337d6519ecfe02ce2b7b6becf90c331a4861e370bb76f76bb27301a1e",
+      "bytes": 4724,
+      "rows": 44
+    },
+    "cg_tickers_depth.csv": {
+      "sha256": "4b44142a7271d349c257a295b5c901556970fce4c14b49b557c3821cedff3c2f",
+      "bytes": 57026,
+      "rows": 322
+    },
+    "coingecko_fiat_raw.jsonl": {
+      "sha256": "eb65381ca227cda5665519758fdde95e413702e8b5c0d530fac27fd9e76c3058",
+      "bytes": 15605107,
+      "rows": 192
+    },
+    "coingecko_token_raw.jsonl": {
+      "sha256": "e471f12fad195b4b4dbd77b68498c4adcd816fcea1698d8925ed811afedec3fd",
+      "bytes": 582334,
+      "rows": 47
+    }
+  },
   "code_sha256": {
-    "collect_snapshot.py": "8c31a4ddde6d44b513f52cc9fa1fde283248c55a5e60d1c0abf2fc5e75f38669",
-    "build_panel.py": "e52abde9e07988fb1e162d16e8ab5266009b44ce310c827ac1fabb130242127d",
+    "collect_snapshot.py": "fc0a818e72d65b6dd8f7f57d749bfd328160d37ab32fc1026716698c7284dc78",
+    "build_panel.py": "42a7e6f5c22e6fe8f007484235dd8edf020c17cabd51d4eaa57882dc45cb5389",
     "puller_layer1.py": "43e9cbc5d14c884bb4751ba64efa86553d02ea23a47a037b7f024e66b400484a",
     "puller_layer2.py": "c29309531f9598fe9323989a26e5305a993ecd55aa62f4d18648199846fa0bbf",
     "corridors.csv": "1906fddefe8c7ee3e15982bd20be1df3d980568e696aab4f3c14ca6563f2c818",
