@@ -1,0 +1,52 @@
+{
+  "date": "2026-08-28",
+  "collected_utc": "2026-08-28T17:52:33+00:00",
+  "keyed": true,
+  "runs": [
+    {
+      "script": "puller_layer2.py",
+      "returncode": 0,
+      "seconds": 476.5
+    },
+    {
+      "script": "puller_layer1.py",
+      "returncode": 0,
+      "seconds": 107.2
+    }
+  ],
+  "files": {
+    "cg_fiat_pairs_depth.csv": {
+      "sha256": "418ae6dcd5a72644fc159dac1bfb551a14aad35d86a17b81b974991ef42f100d",
+      "bytes": 16186,
+      "rows": 109
+    },
+    "cg_markets.csv": {
+      "sha256": "90061f4bdbe62903f57f37d7f5461dc0d4bf4fe9672244152bb10c42b043e1e2",
+      "bytes": 4813,
+      "rows": 44
+    },
+    "cg_tickers_depth.csv": {
+      "sha256": "744173379584a49657ac85bbfa9c464212691b22567f282758fa401c7c050ddb",
+      "bytes": 54316,
+      "rows": 309
+    },
+    "coingecko_fiat_raw.jsonl": {
+      "sha256": "b25c8550d8b4474b27d2424d78ca2348d391d5a73a2a810b695ac3cd5a1e2eca",
+      "bytes": 16706755,
+      "rows": 200
+    },
+    "coingecko_token_raw.jsonl": {
+      "sha256": "61752dd969f2a74fd827421b8aaec8a0125759cdf6f7afe06fd1ab3bf43b3264",
+      "bytes": 582095,
+      "rows": 47
+    }
+  },
+  "code_sha256": {
+    "collect_snapshot.py": "fc0a818e72d65b6dd8f7f57d749bfd328160d37ab32fc1026716698c7284dc78",
+    "build_panel.py": "42a7e6f5c22e6fe8f007484235dd8edf020c17cabd51d4eaa57882dc45cb5389",
+    "puller_layer1.py": "43e9cbc5d14c884bb4751ba64efa86553d02ea23a47a037b7f024e66b400484a",
+    "puller_layer2.py": "c29309531f9598fe9323989a26e5305a993ecd55aa62f4d18648199846fa0bbf",
+    "corridors.csv": "1906fddefe8c7ee3e15982bd20be1df3d980568e696aab4f3c14ca6563f2c818",
+    "venue_registry.csv": "e73d02dd6d24b1f7eca52183f4e20148bfba4aef9e04850015a84130c26e7d9d"
+  }
+}
