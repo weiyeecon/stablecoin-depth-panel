@@ -1,0 +1,46 @@
+{
+  "attempts": [
+    {
+      "error": "HTTP 451: {\n  \"code\": 0,\n  \"msg\": \"Service unavailable from a restricted location according to 'b. Eligibility' in https://www.binance.com/en/terms. Please contact customer service if you believe you received this message in error.\"\n}",
+      "pair": "USDTTRY",
+      "status": "failed",
+      "venue": "binance"
+    },
+    {
+      "error": "HTTP 451: {\n  \"code\": 0,\n  \"msg\": \"Service unavailable from a restricted location according to 'b. Eligibility' in https://www.binance.com/en/terms. Please contact customer service if you believe you received this message in error.\"\n}",
+      "pair": "USDTBRL",
+      "status": "failed",
+      "venue": "binance"
+    },
+    {
+      "error": "HTTP 451: {\n  \"code\": 0,\n  \"msg\": \"Service unavailable from a restricted location according to 'b. Eligibility' in https://www.binance.com/en/terms. Please contact customer service if you believe you received this message in error.\"\n}",
+      "pair": "USDTIDR",
+      "status": "failed",
+      "venue": "binance"
+    },
+    {
+      "http_status": 200,
+      "pair": "USDTZAR",
+      "raw_file": "valr_usdtzar_raw.json",
+      "raw_sha256": "0ebba9cf423954670c37b24abd3bc9769c3ad4e8b3a457346d358124f440d51b",
+      "status": "success",
+      "venue": "valr"
+    },
+    {
+      "http_status": 200,
+      "pair": "usdt_thb",
+      "raw_file": "bitkub_usdt_thb_raw.json",
+      "raw_sha256": "de08c9d6fff54cd31818ad34e0f7d8d91d0330aa11b17443c8b6e082878d2ff1",
+      "status": "success",
+      "venue": "bitkub"
+    }
+  ],
+  "code_sha256": "66d4fa5077d76215e44001841e83bc34a2b21f6e237281a75383d1a665d22670",
+  "config_sha256": "b6c69f25fbf661a0b350d1491fa94322f2682b43d177ffa7a742707b26e4bb68",
+  "created_utc": "2026-09-04T10:05:57.579130+00:00",
+  "date": "2026-09-04",
+  "outputs": {
+    "execution_curves.csv": "bbb66ffc8db95d0830a2f67a042451d19affecfa329de3b32f477b22ad501b21",
+    "threshold_depth.csv": "33412c77f46f7e59dae97032bd650536a7923a2a51d38a3f3db2edf182802a19"
+  }
+}
