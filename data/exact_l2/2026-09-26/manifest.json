@@ -1,0 +1,46 @@
+{
+  "attempts": [
+    {
+      "error": "HTTP 451: {\n  \"code\": 0,\n  \"msg\": \"Service unavailable from a restricted location according to 'b. Eligibility' in https://www.binance.com/en/terms. Please contact customer service if you believe you received this message in error.\"\n}",
+      "pair": "USDTTRY",
+      "status": "failed",
+      "venue": "binance"
+    },
+    {
+      "error": "HTTP 451: {\n  \"code\": 0,\n  \"msg\": \"Service unavailable from a restricted location according to 'b. Eligibility' in https://www.binance.com/en/terms. Please contact customer service if you believe you received this message in error.\"\n}",
+      "pair": "USDTBRL",
+      "status": "failed",
+      "venue": "binance"
+    },
+    {
+      "error": "HTTP 451: {\n  \"code\": 0,\n  \"msg\": \"Service unavailable from a restricted location according to 'b. Eligibility' in https://www.binance.com/en/terms. Please contact customer service if you believe you received this message in error.\"\n}",
+      "pair": "USDTIDR",
+      "status": "failed",
+      "venue": "binance"
+    },
+    {
+      "http_status": 200,
+      "pair": "USDTZAR",
+      "raw_file": "valr_usdtzar_raw.json",
+      "raw_sha256": "3e224dacf51ea6f3b2db3bcc402fc30ee8401127aac899d2e490d598dfa7a9a1",
+      "status": "success",
+      "venue": "valr"
+    },
+    {
+      "http_status": 200,
+      "pair": "usdt_thb",
+      "raw_file": "bitkub_usdt_thb_raw.json",
+      "raw_sha256": "f233ff26ff9e75cb6f17ce6030f16fdda7155e8f77d5bf5579846f4dbeb316bf",
+      "status": "success",
+      "venue": "bitkub"
+    }
+  ],
+  "code_sha256": "66d4fa5077d76215e44001841e83bc34a2b21f6e237281a75383d1a665d22670",
+  "config_sha256": "b6c69f25fbf661a0b350d1491fa94322f2682b43d177ffa7a742707b26e4bb68",
+  "created_utc": "2026-09-26T10:24:46.013431+00:00",
+  "date": "2026-09-26",
+  "outputs": {
+    "execution_curves.csv": "bdd1747e71888d442db368d2214866a3c13adb1c710cc4b11d3c30569e4409e6",
+    "threshold_depth.csv": "7f163c3562a9c13e8dae3b5e3ad2fcfc34ca88d54f8af0058f9202aac4515cc6"
+  }
+}
