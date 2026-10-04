@@ -4,6 +4,14 @@ on:
   schedule:
     - cron: "41 5 * * *"
   workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - '*.py'
+      - 'exact_l2_config.csv'
+      - 'requirements.txt'
+      - 'scripts/commit_collected_data.sh'
+      - '.github/workflows/main.yml'
 
 permissions:
   contents: write
@@ -18,41 +26,50 @@ jobs:
     timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-      - name: Collect snapshot
+      - name: Test native book adapters and provenance
+        id: tests
+        run: |
+          python test_depth_logic.py
+          python -m unittest discover -p 'test_*.py' -v
+
+      - name: Collect native L2 books
+        id: native
+        # Failure stays red, but the steps below still archive partial results.
+        run: python collect_exact_l2.py
+
+      - name: Preserve this native attempt before Git push
+        if: ${{ !cancelled() && steps.native.outputs.snapshot_path != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-l2-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ steps.native.outputs.snapshot_path }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Build separate native L2 panels
+        if: ${{ !cancelled() && steps.tests.outcome == 'success' }}
+        run: python build_exact_l2_panel.py
+
+      - name: Commit native data and coverage
+        if: ${{ !cancelled() && steps.tests.outcome == 'success' }}
+        run: bash scripts/commit_collected_data.sh
+
+      - name: Collect CoinGecko proxy snapshot
+        if: ${{ !cancelled() && steps.tests.outcome == 'success' }}
         env:
           CG_DEMO_KEY: ${{ secrets.CG_DEMO_KEY }}
         run: python collect_snapshot.py
 
-      - name: Collect native L2 books
-        if: always()
-        continue-on-error: true
-        run: python collect_exact_l2.py
-
-      - name: Commit snapshot
-        if: always()
-        run: |
-          git config user.name "depth-collector"
-          git config user.email "depth-collector@users.noreply.github.com"
-          git add -A data panel || true
-          if git diff --cached --quiet; then
-            echo "nothing to commit"
-            exit 0
-          fi
-          git commit -m "depth snapshot $(date -u +%F) [skip ci]"
-          for attempt in 1 2 3; do
-            git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || true
-            if git push origin "HEAD:${GITHUB_REF_NAME}"; then
-              echo "pushed on attempt ${attempt}"
-              exit 0
-            fi
-            sleep 5
-          done
-          echo "push failed after 3 attempts"
-          exit 1
+      - name: Commit proxy snapshot
+        if: ${{ !cancelled() && steps.tests.outcome == 'success' }}
+        run: bash scripts/commit_collected_data.sh
