@@ -38,7 +38,7 @@ Bitso 的 BRL/MXN adapter 已保留为可选来源，默认禁用。来源可达
 - 所有启用市场的规范化 base 为 USDT，quote 为当地法币；卖出 USDT 消耗 bids。
 - 档位价格单位为当地法币/USDT，数量为 USDT token，`quote_proceeds` 是当地法币金额。
 - 新 `*_stablecoin_units` 是 token 数量。旧 `*_stablecoin_usd` 是相同数量的兼容别名，仅假设 1 token = 1 USD，**不是按市场汇率换算后的美元金额**。
-- `collected_utc` 是请求发出时刻，`received_utc` 是本地接收时刻；交易所没有快照时间就留空。BtcTurk 的时间戳为毫秒；Mercado Bitcoin 未明确标注时间单位，因此按数值量级解析并显式标注 inferred，原值保存在 raw JSON。提供交易所时间的快照会做新鲜度检查。
+- `collected_utc` 是请求发出时刻，`received_utc` 是本地接收时刻；交易所没有快照时间就留空。BtcTurk 的时间戳为毫秒；Mercado Bitcoin 未明确标注时间单位；2026-10-04 实际响应为纳秒，因此支持秒/毫秒/微秒/纳秒的数值量级解析并显式标注 inferred，原值保存在 raw JSON。提供交易所时间的快照会做新鲜度检查。
 - 深度只针对 API 返回的档位计算。未覆盖阈值范围时数值是下界；固定流量未完全成交会保留 fill_rate 与 book_exhausted。
 - `build_exact_l2_panel.py` 校验 manifest 中的 CSV/raw SHA256，只纳入 manifest 标记成功的 native 记录。每个日期、来源、场所、pair 和 snapshot 都保留，不跨市场加总。旧版没有的元数据留空并标明 legacy；其原始观测时刻不更改。
 

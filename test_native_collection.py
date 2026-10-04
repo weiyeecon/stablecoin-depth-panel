@@ -43,9 +43,15 @@ class NativeCollectionTests(unittest.TestCase):
         expected = "2026-10-04T00:00:00+00:00"
         value = datetime.fromisoformat(expected).timestamp()
         self.assertEqual(l2.exchange_timestamp("btcturk", {"data": {"timestamp": value * 1000}}), expected)
-        for v in [value, value * 1000]:
+        for v in [value, value * 1000, value * 1_000_000, value * 1_000_000_000]:
             self.assertEqual(l2.exchange_timestamp("mercadobitcoin", {"timestamp": v}), expected)
         self.assertIsNone(l2.exchange_timestamp("indodax", {"server_time": value}))
+
+    def test_observed_mercado_nanosecond_clock(self):
+        raw_clock = 1791155147334048300
+        actual = l2.exchange_timestamp("mercadobitcoin", {"timestamp": raw_clock})
+        self.assertEqual(actual[:19], "2026-10-04T23:05:47")
+        self.assertEqual(l2.epoch_scale(raw_clock), (1_000_000_000, "nanoseconds"))
 
     def test_coverage_requires_all_corridors(self):
         attempts = [{"venue": "test", "pair": c, "corridor": c, "status": "success"}

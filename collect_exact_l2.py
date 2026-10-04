@@ -205,6 +205,18 @@ def request_json(url, params, timeout=30, retries=3):
     raise CollectionError("request did not return a response")
 
 
+def epoch_scale(value):
+    """Infer modern Unix epoch units by magnitude; callers validate freshness."""
+    value = abs(float(value))
+    if value >= 1e18:
+        return 1_000_000_000, "nanoseconds"
+    if value >= 1e15:
+        return 1_000_000, "microseconds"
+    if value >= 1e12:
+        return 1_000, "milliseconds"
+    return 1, "seconds"
+
+
 def exchange_timestamp(venue, payload):
     """Only documented snapshot clocks; request receipt is recorded separately."""
     value = None
@@ -217,7 +229,7 @@ def exchange_timestamp(venue, payload):
         if value is not None:
             # API documents a numeric timestamp without specifying its unit.
             value = float(value)
-            return datetime.fromtimestamp(value / 1000 if value >= 1e12 else value,
+            return datetime.fromtimestamp(value / epoch_scale(value)[0],
                                           timezone.utc).isoformat()
     elif venue == "bitso":
         value = payload.get("payload", {}).get("updated_at")
@@ -310,7 +322,7 @@ def collect(config_path, output_root, day=None, summary_path=None):
                     "received_utc": attempt["received_utc"],
                     "exchange_timestamp_utc": timestamp,
                     "exchange_timestamp_status": "provided" if timestamp else "unavailable",
-                    "exchange_timestamp_encoding": ("epoch_unit_inferred_by_magnitude"
+                    "exchange_timestamp_encoding": (f"epoch_{epoch_scale(payload['timestamp'])[1]}_inferred_by_magnitude"
                         if venue == "mercadobitcoin" and timestamp else
                         "documented_exchange_clock" if timestamp else "unavailable"),
                     "venue": venue, "pair": pair, "corridor": row["corridor"],
