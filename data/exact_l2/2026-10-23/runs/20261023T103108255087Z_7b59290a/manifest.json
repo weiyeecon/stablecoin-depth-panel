@@ -1,0 +1,182 @@
+{
+  "attempts": [
+    {
+      "collected_utc": "2026-10-23T10:31:08.258475+00:00",
+      "corridor": "TRY",
+      "note": "Disabled after HTTP451 access restriction; missing historical Binance books remain missing",
+      "pair": "USDTTRY",
+      "status": "disabled",
+      "venue": "binance"
+    },
+    {
+      "collected_utc": "2026-10-23T10:31:08.258564+00:00",
+      "corridor": "BRL",
+      "note": "Disabled after HTTP451 access restriction; missing historical Binance books remain missing",
+      "pair": "USDTBRL",
+      "status": "disabled",
+      "venue": "binance"
+    },
+    {
+      "collected_utc": "2026-10-23T10:31:08.258631+00:00",
+      "corridor": "IDR",
+      "note": "Disabled after HTTP451; native symbol was never verified; not treated as an observed market",
+      "pair": "USDTIDR",
+      "status": "disabled",
+      "venue": "binance"
+    },
+    {
+      "ask_levels": 100,
+      "bid_levels": 100,
+      "collected_utc": "2026-10-23T10:31:08.258721+00:00",
+      "corridor": "TRY",
+      "exchange_timestamp_utc": "2026-10-23T10:31:08.488000+00:00",
+      "http_status": 200,
+      "note": "Independent TRY venue; new forward snapshots only; not a Binance backfill",
+      "pair": "USDTTRY",
+      "raw_file": "btcturk_usdttry_raw.json",
+      "raw_sha256": "04092381d54e8101ee82e123e84356fd4bf3d2b10c6681796bd804e31862270f",
+      "received_utc": "2026-10-23T10:31:08.577626+00:00",
+      "source_params": {
+        "limit": 100,
+        "pairSymbol": "USDTTRY"
+      },
+      "source_url": "https://api.btcturk.com/api/v2/orderbook",
+      "status": "success",
+      "venue": "btcturk"
+    },
+    {
+      "ask_levels": 87,
+      "bid_levels": 80,
+      "collected_utc": "2026-10-23T10:31:08.579047+00:00",
+      "corridor": "BRL",
+      "exchange_timestamp_utc": "2026-10-23T10:31:08.701149+00:00",
+      "http_status": 200,
+      "note": "Independent BRL venue; new forward snapshots only; not a Binance backfill",
+      "pair": "USDT-BRL",
+      "raw_file": "mercadobitcoin_usdt-brl_raw.json",
+      "raw_sha256": "3f72c41eb3acd43409d2458a2e12a6e3a5f97768d2587f2d4325f3ac20c41274",
+      "received_utc": "2026-10-23T10:31:08.738278+00:00",
+      "source_params": {
+        "limit": 100
+      },
+      "source_url": "https://api.mercadobitcoin.net/api/v4/USDT-BRL/orderbook",
+      "status": "success",
+      "venue": "mercadobitcoin"
+    },
+    {
+      "ask_levels": 150,
+      "bid_levels": 150,
+      "collected_utc": "2026-10-23T10:31:08.739522+00:00",
+      "corridor": "IDR",
+      "exchange_timestamp_utc": null,
+      "http_status": 200,
+      "note": "Independent IDR venue; new forward snapshots only; not a Binance backfill",
+      "pair": "usdtidr",
+      "raw_file": "indodax_usdtidr_raw.json",
+      "raw_sha256": "7f1344eecd23f118ea3ff342c68dca194613541cb05564a37ddb35b8041db73a",
+      "received_utc": "2026-10-23T10:31:09.627857+00:00",
+      "source_params": {},
+      "source_url": "https://indodax.com/api/depth/usdtidr",
+      "status": "success",
+      "venue": "indodax"
+    },
+    {
+      "ask_levels": 287,
+      "bid_levels": 255,
+      "collected_utc": "2026-10-23T10:31:09.629215+00:00",
+      "corridor": "ZAR",
+      "exchange_timestamp_utc": null,
+      "http_status": 200,
+      "note": "Existing native ZAR series retained",
+      "pair": "USDTZAR",
+      "raw_file": "valr_usdtzar_raw.json",
+      "raw_sha256": "f2d882e3e8182fd5054cf99906feb07718dd7e83015cfe7b28887202193f4f31",
+      "received_utc": "2026-10-23T10:31:09.887503+00:00",
+      "source_params": {},
+      "source_url": "https://api.valr.com/v1/public/USDTZAR/orderbook/full",
+      "status": "success",
+      "venue": "valr"
+    },
+    {
+      "ask_levels": 464,
+      "bid_levels": 431,
+      "collected_utc": "2026-10-23T10:31:09.891920+00:00",
+      "corridor": "THB",
+      "exchange_timestamp_utc": null,
+      "http_status": 200,
+      "note": "Existing native THB series retained; v3 sizes are base units",
+      "pair": "usdt_thb",
+      "raw_file": "bitkub_usdt_thb_raw.json",
+      "raw_sha256": "3e8978fd6386e94635a14c55c6c78e6ebfbf9c1142147c829b0b9fa25fd2f0b8",
+      "received_utc": "2026-10-23T10:31:10.665586+00:00",
+      "source_params": {
+        "lmt": 1000,
+        "sym": "usdt_thb"
+      },
+      "source_url": "https://api.bitkub.com/api/v3/market/depth",
+      "status": "success",
+      "venue": "bitkub"
+    },
+    {
+      "collected_utc": "2026-10-23T10:31:10.668851+00:00",
+      "corridor": "BRL",
+      "note": "Documented independent alternative BRL market; optional",
+      "pair": "usdt_brl",
+      "status": "disabled",
+      "venue": "bitso"
+    },
+    {
+      "collected_utc": "2026-10-23T10:31:10.668919+00:00",
+      "corridor": "MXN",
+      "note": "Optional sixth corridor; disabled",
+      "pair": "usdt_mxn",
+      "status": "disabled",
+      "venue": "bitso"
+    }
+  ],
+  "code_sha256": "6fcc8893102231404a0948acd97c69eae831aa62ee6c1937184439f40ddea314",
+  "config_archive_sha256": "ef12252c44124590793ed8b3a39620ad0b63b5d2ddc07c29ba51e254c92a8191",
+  "config_sha256": "47df2b0a1132e5d9f9f72a139a78d2850deb5c6b35aeaa75940dd0983bc61d4c",
+  "coverage": {
+    "disabled_sources": [
+      "binance:USDTTRY",
+      "binance:USDTBRL",
+      "binance:USDTIDR",
+      "bitso:usdt_brl",
+      "bitso:usdt_mxn"
+    ],
+    "expected_sources": 5,
+    "failed_sources": [],
+    "missing_corridors": [],
+    "observed_corridors": [
+      "BRL",
+      "IDR",
+      "THB",
+      "TRY",
+      "ZAR"
+    ],
+    "required_corridors": [
+      "BRL",
+      "IDR",
+      "THB",
+      "TRY",
+      "ZAR"
+    ],
+    "scope": "configured active native markets only; not historical Binance coverage",
+    "status": "complete",
+    "successful_sources": 5
+  },
+  "created_utc": "2026-10-23T10:31:10.674011+00:00",
+  "date": "2026-10-23",
+  "github_run_attempt": "1",
+  "github_run_id": "39939499290",
+  "github_sha": "3cf9384db5c744a228c96c9f4f4d14987b1f4e47",
+  "historical_backfill": false,
+  "outputs": {
+    "execution_curves.csv": "1a6c9add335a2dc72504288fbf6aa0c83d33a01836779e273dfe78527ea28943",
+    "threshold_depth.csv": "791a171f553790bb81388629c36466cb886a372db40919ea23c2fc9b84b6a62c"
+  },
+  "schema_version": 2,
+  "snapshot_id": "20261023T103108255087Z_7b59290a",
+  "source_type": "native_l2"
+}
