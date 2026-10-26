@@ -1,15 +1,15 @@
 {
-  "disabled_books_declared": 115,
+  "disabled_books_declared": 120,
   "errors": [],
   "failed_books_declared": 187,
   "integrity_status": "passed",
   "legacy_metadata_policy": "Unavailable legacy fields are blank and labeled legacy; no backfill.",
   "rows_written": {
-    "native_l2_execution_curves.csv": 1428,
-    "native_l2_threshold_depth.csv": 952
+    "native_l2_execution_curves.csv": 1458,
+    "native_l2_threshold_depth.csv": 972
   },
-  "snapshots_discovered": 85,
+  "snapshots_discovered": 86,
   "source_type": "native_l2",
-  "successful_books_declared": 238,
+  "successful_books_declared": 243,
   "usd_conversion_assumption": "1 stablecoin token = 1 USD; no FX conversion"
 }
