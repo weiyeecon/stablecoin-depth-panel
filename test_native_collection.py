@@ -122,6 +122,72 @@ class NativeCollectionTests(unittest.TestCase):
         with self.assertRaisesRegex(l2.CollectionError, "not valid JSON"):
             l2.request_json("https://example.invalid/book", {})
 
+    @patch("requests.get")
+    @patch.object(l2.time, "sleep")
+    def test_redirect_diagnostics_are_safe_and_not_retried(self, sleep, get):
+        get.return_value = SimpleNamespace(
+            status_code=302, text="<html><title>Página indisponível</title>secret-body</html>",
+            url="https://user:password@example.invalid/book?token=secret#fragment",
+            headers={"Location": "https://other.invalid/down?token=private",
+                     "Content-Type": "text/html", "Set-Cookie": "session=secret-cookie",
+                     "Authorization": "Bearer private", "CF-Ray": "ray-id"})
+        with self.assertRaises(l2.CollectionError) as caught:
+            l2.request_json("https://example.invalid/book", {})
+        self.assertEqual(get.call_count, 1)
+        self.assertFalse(get.call_args.kwargs["allow_redirects"])
+        sleep.assert_not_called()
+        diagnostic = caught.exception.diagnostics["requests"][0]
+        self.assertEqual(diagnostic["final_url"], "https://example.invalid/book")
+        self.assertEqual(diagnostic["location"], "https://other.invalid/down")
+        self.assertEqual(diagnostic["headers"]["CF-Ray"], "ray-id")
+        self.assertTrue(diagnostic["unavailable_page"])
+        serialized = json.dumps(caught.exception.diagnostics) + str(caught.exception)
+        for secret in ("password", "private", "secret", "Set-Cookie", "Authorization"):
+            self.assertNotIn(secret, serialized)
+
+    @patch("requests.get")
+    @patch.object(l2.time, "sleep")
+    def test_403_is_not_retried(self, sleep, get):
+        get.return_value = SimpleNamespace(status_code=403, text="denied", headers={})
+        with self.assertRaises(l2.CollectionError) as caught:
+            l2.request_json("https://example.invalid/book", {})
+        self.assertEqual(caught.exception.error_kind, "access_restricted")
+        self.assertEqual(get.call_count, 1)
+        sleep.assert_not_called()
+
+    @patch("requests.get")
+    @patch.object(l2.time, "sleep")
+    def test_transient_errors_have_bounded_retries(self, sleep, get):
+        get.return_value = SimpleNamespace(status_code=429, text="rate limited",
+                                          headers={"Retry-After": "999"})
+        with self.assertRaises(l2.CollectionError) as caught:
+            l2.request_json("https://example.invalid/book", {})
+        self.assertEqual(get.call_count, 3)
+        self.assertEqual([x.args[0] for x in sleep.call_args_list], [120, 120])
+        self.assertEqual(len(caught.exception.diagnostics["requests"]), 3)
+
+    @patch("requests.get")
+    @patch.object(l2.time, "sleep")
+    def test_transient_error_can_recover_without_alternate_endpoint(self, sleep, get):
+        ok = SimpleNamespace(status_code=200, text="{}", headers={}, json=lambda: {})
+        get.side_effect = [SimpleNamespace(status_code=503, text="unavailable", headers={}), ok]
+        payload, response = l2.request_json("https://example.invalid/book", {})
+        self.assertEqual(payload, {})
+        self.assertIs(response, ok)
+        self.assertEqual([x.args[0] for x in get.call_args_list],
+                         ["https://example.invalid/book"] * 2)
+
+    @patch.object(l2, "request_json")
+    def test_failure_manifest_keeps_diagnostics(self, request):
+        request.side_effect = l2.CollectionError("HTTP 302", 302, "http_error",
+                                                 {"requests": [{"http_status": 302}]})
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            result = l2.collect(self.config(root), root / "out")
+            self.assertEqual(result["attempts"][0]["request_diagnostics"],
+                             {"requests": [{"http_status": 302}]})
+            self.assertEqual(result["coverage"]["successful_sources"], 0)
+
     def test_units_and_truncated_depth(self):
         rows = l2.threshold_depth_rows([(99.9, 2)], [(100.1, 1)], {})
         self.assertTrue(rows[-1]["depth_is_lower_bound"])

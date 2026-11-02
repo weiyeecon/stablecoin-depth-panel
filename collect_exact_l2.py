@@ -17,6 +17,7 @@ import uuid
 from pathlib import Path
 import time
 from datetime import datetime, timezone
+from urllib.parse import urlsplit, urlunsplit
 
 import numpy as np
 import pandas as pd
@@ -167,42 +168,91 @@ def execution_rows(bids, asks, meta):
 
 
 class CollectionError(RuntimeError):
-    def __init__(self, message, http_status=None, error_kind="request_error"):
+    def __init__(self, message, http_status=None, error_kind="request_error", diagnostics=None):
         super().__init__(message)
         self.http_status = http_status
         self.error_kind = error_kind
+        self.diagnostics = diagnostics or {}
+
+
+def safe_url(value):
+    """Retain endpoint identity, never credentials, query tokens or fragments."""
+    try:
+        parsed = urlsplit(str(value))
+        if parsed.scheme not in ("http", "https") or not parsed.hostname:
+            return ""
+        return urlunsplit((parsed.scheme, parsed.hostname, parsed.path, "", ""))[:500]
+    except ValueError:
+        return ""
+
+
+def response_diagnostics(response, requested_url):
+    """Small allowlist only: no cookies, auth headers or response body content."""
+    headers = getattr(response, "headers", {})
+    body = getattr(response, "text", "")
+    content_type = headers.get("Content-Type", headers.get("content-type", ""))
+    return {
+        "received_utc": datetime.now(timezone.utc).isoformat(),
+        "http_status": response.status_code,
+        "final_url": safe_url(getattr(response, "url", requested_url)),
+        "headers": {key: str(headers.get(key, headers.get(key.lower(), "")))[:200]
+                    for key in ("Content-Type", "Retry-After", "Server", "CF-Ray")
+                    if headers.get(key, headers.get(key.lower(), ""))},
+        "redirects": [{"http_status": item.status_code,
+                       "url": safe_url(getattr(item, "url", "")),
+                       "location": safe_url(getattr(item, "headers", {}).get("Location", ""))}
+                      for item in getattr(response, "history", [])],
+        "location": safe_url(headers.get("Location", headers.get("location", ""))),
+        "response_format": "html" if "html" in content_type.lower() or "<html" in body[:1000].lower()
+                           else "json" if "json" in content_type.lower() else "other",
+        "unavailable_page": "página indisponível" in body[:2000].lower(),
+    }
 
 
 def request_json(url, params, timeout=30, retries=3):
-    """Retry only transient failures. Never reroute an access restriction."""
+    """Retry only transient failures. Never retry/reroute 403, 451 or HTML redirects."""
     import requests
+    events = []
     for attempt in range(retries):
         try:
-            response = requests.get(url, params=params, timeout=timeout,
+            response = requests.get(url, params=params, timeout=timeout, allow_redirects=False,
                                     headers={"accept": "application/json",
                                              "user-agent": "academic-depth-study/3.0"})
         except (requests.Timeout, requests.ConnectionError) as exc:
+            # Exception strings may include a URL query or proxy credentials.
+            events.append({"error_kind": type(exc).__name__, "attempt": attempt + 1})
             if attempt + 1 == retries:
-                raise CollectionError(str(exc)) from exc
+                raise CollectionError(type(exc).__name__, diagnostics={"requests": events}) from exc
             time.sleep(2 ** (attempt + 1))
             continue
+        diagnostic = response_diagnostics(response, url)
+        diagnostic["attempt"] = attempt + 1
+        events.append(diagnostic)
         if response.status_code == 200:
             try:
                 return response.json(), response
             except ValueError as exc:
                 raise CollectionError("HTTP 200 was not valid JSON", 200,
-                                      "invalid_response") from exc
+                                      "invalid_response", {"requests": events}) from exc
         status = response.status_code
         if status in (429, 500, 502, 503, 504) and attempt + 1 < retries:
             delay = 2 ** (attempt + 1)
-            retry_after = response.headers.get("Retry-After", "")
+            retry_after = getattr(response, "headers", {}).get("Retry-After", "")
             if str(retry_after).isdigit():
                 delay = max(delay, min(int(retry_after), 120))
             time.sleep(delay)
             continue
         kind = "access_restricted" if status in (403, 451) else "http_error"
-        raise CollectionError(f"HTTP {status}: {response.text[:300]}", status, kind)
-    raise CollectionError("request did not return a response")
+        if status in (403, 451):
+            hint = "access denied; do not bypass; consult provider"
+        elif 300 <= status < 400:
+            hint = "unexpected redirect/non-book response; inspect diagnostics and provider status"
+        else:
+            hint = "request failed; inspect diagnostics"
+        if diagnostic["unavailable_page"]:
+            hint += "; upstream unavailable page"
+        raise CollectionError(f"HTTP {status}: {hint}", status, kind, {"requests": events})
+    raise CollectionError("request did not return a response", diagnostics={"requests": events})
 
 
 def epoch_scale(value):
@@ -341,6 +391,8 @@ def collect(config_path, output_root, day=None, summary_path=None):
         except Exception as exc:
             attempt.update(status="failed", error=str(exc)[:500],
                            error_kind=getattr(exc, "error_kind", "invalid_book"))
+            if getattr(exc, "diagnostics", None):
+                attempt["request_diagnostics"] = exc.diagnostics
             if getattr(exc, "http_status", None) is not None:
                 attempt["http_status"] = exc.http_status
         attempts.append(attempt)
@@ -356,6 +408,7 @@ def collect(config_path, output_root, day=None, summary_path=None):
                 "github_run_id": os.environ.get("GITHUB_RUN_ID"),
                 "github_run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
                 "github_sha": os.environ.get("GITHUB_SHA"),
+                "checked_out_git_sha": os.environ.get("COLLECTION_GIT_SHA"),
                 "attempts": attempts, "coverage": summarize_coverage(attempts),
                 "outputs": {path.name: sha256(path) for path in (depth_path, curve_path)}}
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")

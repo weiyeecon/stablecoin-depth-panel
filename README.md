@@ -13,6 +13,14 @@ GitHub Actions 每日 **UTC 05:41** 执行；也支持手动 Run workflow。修�
 
 绿色代表此次配置中启用的来源与五个走廊全部采到，不代表历史 Binance 数据已补齐，也不代表每个订单簿覆盖全部深度。查看 `depth_is_lower_bound`、`book_covers_threshold`、`book_exhausted` 和逐来源状态。
 
+## 安全重跑与发布
+
+从 Actions 工作流页面选择 **Run workflow → main** 启动新版流程。历史 run 的 Re-run 固定使用历史 YAML，不能用它验证新修复。新版 checkout 读取当前 main，并在 manifest 的 `checked_out_git_sha` 单独记录真实代码版本；`github_sha` 仍是 GitHub 事件的触发 SHA。
+
+数据发布不再对生成的 panel CSV 做 rebase：每次从最新远端 main 建立隔离 worktree，合并不可变原始快照，重新校验并生成完整 panel，再普通 fast-forward push。远端竞争更新时重新读取、合并和重建；同路径内容不一致则明确失败，不选 ours/theirs、不强推。原采集目录与上传的 artifact 保留。原生发布失败后停止依赖的代理阶段，避免在残留 Git 状态上继续提交。
+
+HTTP 302 等非预期重定向不自动跟随、不重试；403/451 不绕过。仅连接错误、429 和指定 5xx 做有限重试。失败 manifest 记录接收时间、HTTP 状态、去掉凭证/查询参数的 URL、Location 和有限诊断头（Content-Type、Retry-After、Server、CF-Ray），不保存 cookie、Authorization 或错误页面正文。该诊断改进不代表交易所恢复，BRL 失败仍保留 partial 和红色状态。
+
 ## 数据源与历史断点
 
 | 走廊 | 启用的原生来源 | 市场 |

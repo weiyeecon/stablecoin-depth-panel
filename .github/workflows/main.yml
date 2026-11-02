@@ -10,7 +10,7 @@ on:
       - '*.py'
       - 'exact_l2_config.csv'
       - 'requirements.txt'
-      - 'scripts/commit_collected_data.sh'
+      - 'scripts/**'
       - '.github/workflows/main.yml'
 
 permissions:
@@ -28,6 +28,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # New attempts use the current data union, not the trigger's stale SHA.
+          ref: main
+
+      - name: Record checked-out revision
+        run: echo "COLLECTION_GIT_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - uses: actions/setup-python@v5
         with:
@@ -57,19 +62,31 @@ jobs:
           retention-days: 14
 
       - name: Build separate native L2 panels
+        id: native_panel
         if: ${{ !cancelled() && steps.tests.outcome == 'success' }}
         run: python build_exact_l2_panel.py
 
       - name: Commit native data and coverage
-        if: ${{ !cancelled() && steps.tests.outcome == 'success' }}
-        run: bash scripts/commit_collected_data.sh
+        id: native_publish
+        if: ${{ !cancelled() && steps.native_panel.outcome == 'success' }}
+        run: bash scripts/commit_collected_data.sh --branch main
 
       - name: Collect CoinGecko proxy snapshot
-        if: ${{ !cancelled() && steps.tests.outcome == 'success' }}
+        id: proxy
+        if: ${{ !cancelled() && steps.native_publish.outcome == 'success' }}
         env:
           CG_DEMO_KEY: ${{ secrets.CG_DEMO_KEY }}
         run: python collect_snapshot.py
 
+      - name: Preserve new proxy attempt before Git push
+        if: ${{ !cancelled() && steps.proxy.outputs.snapshot_path != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: proxy-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ steps.proxy.outputs.snapshot_path }}
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Commit proxy snapshot
-        if: ${{ !cancelled() && steps.tests.outcome == 'success' }}
-        run: bash scripts/commit_collected_data.sh
+        if: ${{ !cancelled() && steps.proxy.outcome == 'success' }}
+        run: bash scripts/commit_collected_data.sh --branch main

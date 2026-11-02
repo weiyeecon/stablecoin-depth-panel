@@ -156,10 +156,13 @@ def main():
                        ("corridors.csv", "venue_registry.csv")}}}
     with open(manifest_path, "w") as f:
         json.dump(manifest, f, indent=2)
+    if os.environ.get("GITHUB_OUTPUT"):
+        with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
+            handle.write(f"snapshot_path={os.path.abspath(snap_dir)}\n")
     shutil.rmtree(work, ignore_errors=True)
     print(f"snapshot {day}: {len(files)} files -> {snap_dir}")
 
-    subprocess.run([sys.executable, os.path.join(HERE, "build_panel.py")], cwd=HERE)
+    subprocess.run([sys.executable, os.path.join(HERE, "build_panel.py")], cwd=HERE, check=True)
     if fails or not files:
         sys.exit(f"collection incomplete: fails={fails} files={list(files)}")
 
