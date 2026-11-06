@@ -63,7 +63,7 @@ def _levels(values):
     return [(float(item[0]), float(item[1])) for item in values]
 
 
-def normalize_book(venue, payload):
+def normalize_book(venue, payload, *, expected_pair=None):
     """Return bids and asks as (price quote/base, quantity base)."""
     if venue == "binance":
         return _levels(payload["bids"]), _levels(payload["asks"])
@@ -89,9 +89,14 @@ def normalize_book(venue, payload):
         result = payload["result"]
         return _levels(result["bids"]), _levels(result["asks"])
     if venue == "bitso":
-        if payload.get("success") is False:
+        if payload.get("success") is not True:
             raise ValueError(f"Bitso API error: {payload.get('error')}")
         result = payload["payload"]
+        if expected_pair is not None and any(
+            level.get("book") != expected_pair
+            for side in ("bids", "asks") for level in result[side]
+        ):
+            raise ValueError("Bitso order book symbol does not match the requested pair")
         bids = [(float(x["price"]), float(x["amount"])) for x in result["bids"]]
         asks = [(float(x["price"]), float(x["amount"])) for x in result["asks"]]
         return bids, asks
@@ -191,6 +196,7 @@ def response_diagnostics(response, requested_url):
     headers = getattr(response, "headers", {})
     body = getattr(response, "text", "")
     content_type = headers.get("Content-Type", headers.get("content-type", ""))
+    location = headers.get("Location", headers.get("location"))
     return {
         "received_utc": datetime.now(timezone.utc).isoformat(),
         "http_status": response.status_code,
@@ -202,7 +208,8 @@ def response_diagnostics(response, requested_url):
                        "url": safe_url(getattr(item, "url", "")),
                        "location": safe_url(getattr(item, "headers", {}).get("Location", ""))}
                       for item in getattr(response, "history", [])],
-        "location": safe_url(headers.get("Location", headers.get("location", ""))),
+        "location": safe_url(location),
+        "location_header_present": location is not None,
         "response_format": "html" if "html" in content_type.lower() or "<html" in body[:1000].lower()
                            else "json" if "json" in content_type.lower() else "other",
         "unavailable_page": "página indisponível" in body[:2000].lower(),
@@ -360,7 +367,7 @@ def collect(config_path, output_root, day=None, summary_path=None):
             with raw_path.open("w", encoding="utf-8") as handle:
                 json.dump(payload, handle, ensure_ascii=False, separators=(",", ":"))
             attempt.update(raw_file=raw_path.name, raw_sha256=sha256(raw_path))
-            bids, asks = validate_book(*normalize_book(venue, payload))
+            bids, asks = validate_book(*normalize_book(venue, payload, expected_pair=pair))
             timestamp = exchange_timestamp(venue, payload)
             if timestamp:
                 age = (datetime.fromisoformat(attempt["received_utc"]) -

@@ -31,9 +31,11 @@ def main():
     assert 0 < cp["local_token_out"] < 50_000
     assert cp["average_slippage_bps"] > 30
 
-    bitso = {"payload": {"bids": [{"price": "19.9", "amount": "5"}],
-                            "asks": [{"price": "20.1", "amount": "6"}]}}
-    nbids, nasks = normalize_book("bitso", bitso)
+    bitso = {"success": True, "payload": {
+        "bids": [{"book": "usdt_mxn", "price": "19.9", "amount": "5"}],
+        "asks": [{"book": "usdt_mxn", "price": "20.1", "amount": "6"}],
+    }}
+    nbids, nasks = normalize_book("bitso", bitso, expected_pair="usdt_mxn")
     assert nbids == [(19.9, 5.0)] and nasks == [(20.1, 6.0)]
 
     registry = load_registry()

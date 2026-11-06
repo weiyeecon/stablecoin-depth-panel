@@ -28,6 +28,41 @@ class NativeCollectionTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 l2.normalize_book(venue, payload)
 
+    @patch.object(l2, "request_json")
+    def test_bitso_snapshot_checks_book_identity_before_emitting_rows(self, request):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            config = root / "config.csv"
+            config.write_text("venue,pair,corridor,stablecoin,stablecoin_side,enabled,limit,note\n"
+                              "bitso,usdt_brl,BRL,USDT,base,true,50,test\n")
+            for book, success, expected in (("usdt_brl", True, "success"),
+                                            ("usdt_mxn", True, "failed"),
+                                            (None, True, "failed"),
+                                            ("usdt_brl", None, "failed"),
+                                            ("usdt_brl", False, "failed")):
+                with self.subTest(book=book, success=success):
+                    data = {
+                        "bids": [{"book": "usdt_brl", "price": "5.40", "amount": "2"}],
+                        "asks": [{"price": "5.41", "amount": "3"}],
+                        "updated_at": datetime.now(timezone.utc).isoformat(),
+                    }
+                    if book is not None:
+                        data["asks"][0]["book"] = book
+                    payload = {"payload": data}
+                    if success is not None:
+                        payload["success"] = success
+                    request.return_value = (payload, SimpleNamespace(status_code=200))
+                    result = l2.collect(config, root / "out")
+                    self.assertEqual(result["attempts"][0]["status"], expected)
+                    snapshot = root / "out" / result["date"] / "runs" / result["snapshot_id"]
+                    for name in ("threshold_depth.csv", "execution_curves.csv"):
+                        rows = (snapshot / name).read_text().splitlines()
+                        if expected == "success":
+                            self.assertGreater(len(rows), 1)
+                            self.assertIn("bitso,usdt_brl,BRL,USDT", rows[1])
+                        else:
+                            self.assertFalse(any(row.strip() for row in rows))
+
     def test_invalid_values_fail_closed(self):
         for bad in [(float("nan"), 1), (1, float("inf")), (0, 1), (1, -1)]:
             with self.assertRaises(ValueError):
@@ -139,11 +174,22 @@ class NativeCollectionTests(unittest.TestCase):
         diagnostic = caught.exception.diagnostics["requests"][0]
         self.assertEqual(diagnostic["final_url"], "https://example.invalid/book")
         self.assertEqual(diagnostic["location"], "https://other.invalid/down")
+        self.assertTrue(diagnostic["location_header_present"])
         self.assertEqual(diagnostic["headers"]["CF-Ray"], "ray-id")
         self.assertTrue(diagnostic["unavailable_page"])
         serialized = json.dumps(caught.exception.diagnostics) + str(caught.exception)
         for secret in ("password", "private", "secret", "Set-Cookie", "Authorization"):
             self.assertNotIn(secret, serialized)
+
+    def test_redirect_diagnostics_distinguish_missing_and_sanitized_location(self):
+        for headers, present in (({}, False), ({"location": "/private?token=secret"}, True),
+                                 ({"Location": ""}, True)):
+            with self.subTest(headers=headers):
+                response = SimpleNamespace(status_code=302, headers=headers)
+                diagnostic = l2.response_diagnostics(response, "https://example.invalid/book")
+                self.assertEqual(diagnostic["location"], "")
+                self.assertEqual(diagnostic["location_header_present"], present)
+                self.assertNotIn("secret", json.dumps(diagnostic))
 
     @patch("requests.get")
     @patch.object(l2.time, "sleep")
