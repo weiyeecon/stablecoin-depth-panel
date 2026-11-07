@@ -1,0 +1,11 @@
+venue,pair,corridor,stablecoin,stablecoin_side,enabled,limit,note
+binance,USDTTRY,TRY,USDT,base,False,5000,Disabled after HTTP451 access restriction; missing historical Binance books remain missing
+binance,USDTBRL,BRL,USDT,base,False,5000,Disabled after HTTP451 access restriction; missing historical Binance books remain missing
+binance,USDTIDR,IDR,USDT,base,False,5000,Disabled after HTTP451; native symbol was never verified; not treated as an observed market
+btcturk,USDTTRY,TRY,USDT,base,True,100,Independent TRY venue; new forward snapshots only; not a Binance backfill
+mercadobitcoin,USDT-BRL,BRL,USDT,base,True,100,Independent BRL venue; new forward snapshots only; not a Binance backfill
+indodax,usdtidr,IDR,USDT,base,True,0,Independent IDR venue; new forward snapshots only; not a Binance backfill
+valr,USDTZAR,ZAR,USDT,base,True,1000,Existing native ZAR series retained
+bitkub,usdt_thb,THB,USDT,base,True,1000,Existing native THB series retained; v3 sizes are base units
+bitso,usdt_brl,BRL,USDT,base,False,50,Documented independent alternative BRL market; optional
+bitso,usdt_mxn,MXN,USDT,base,False,50,Optional sixth corridor; disabled
