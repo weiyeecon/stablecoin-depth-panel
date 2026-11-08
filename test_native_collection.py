@@ -1,8 +1,9 @@
 """Offline contract/error tests; fixtures are synthetic, not research observations."""
+import csv
 import json
 import tempfile
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -27,6 +28,42 @@ class NativeCollectionTests(unittest.TestCase):
         for venue, payload in [("btcturk", {"success": False}), ("bitkub", {"error": 1})]:
             with self.assertRaises(ValueError):
                 l2.normalize_book(venue, payload)
+
+    @patch.object(l2, "request_json")
+    def test_foxbit_collects_brl_under_its_own_venue_and_rejects_stale_books(self, request):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            config = root / "config.csv"
+            config.write_text("venue,pair,corridor,stablecoin,stablecoin_side,enabled,limit,note\n"
+                              "mercadobitcoin,USDT-BRL,BRL,USDT,base,false,100,paused\n"
+                              "foxbit,usdtbrl,BRL,USDT,base,true,100,test\n")
+            now = datetime.now(timezone.utc)
+            for clock, expected in ((now, "success"), (now - timedelta(hours=1), "failed")):
+                with self.subTest(expected=expected):
+                    request.reset_mock()
+                    payload = {"sequence_id": 123, "timestamp": int(clock.timestamp() * 1000),
+                               "bids": [["5.40", "2"]], "asks": [["5.41", "3"]]}
+                    request.return_value = (payload, SimpleNamespace(status_code=200))
+                    result = l2.collect(config, root / "out")
+                    request.assert_called_once_with(
+                        "https://api.foxbit.com.br/rest/v3/markets/usdtbrl/orderbook", {"depth": 100})
+                    paused, foxbit = result["attempts"]
+                    self.assertEqual(paused["status"], "disabled")
+                    self.assertEqual(foxbit["status"], expected)
+                    self.assertEqual(foxbit["raw_file"], "foxbit_usdtbrl_raw.json")
+                    snapshot = root / "out" / result["date"] / "runs" / result["snapshot_id"]
+                    with (snapshot / "threshold_depth.csv").open(newline="") as handle:
+                        rows = list(csv.DictReader(handle))
+                    if expected == "success":
+                        self.assertIn("BRL", result["coverage"]["observed_corridors"])
+                        exchange_time = datetime.fromisoformat(foxbit["exchange_timestamp_utc"])
+                        self.assertEqual(exchange_time.timestamp(), payload["timestamp"] / 1000)
+                        self.assertEqual({(r["venue"], r["pair"], r["corridor"]) for r in rows},
+                                         {("foxbit", "usdtbrl", "BRL")})
+                    else:
+                        self.assertIn("freshness window", foxbit["error"])
+                        self.assertIn("BRL", result["coverage"]["missing_corridors"])
+                        self.assertEqual(rows, [])
 
     @patch.object(l2, "request_json")
     def test_bitso_snapshot_checks_book_identity_before_emitting_rows(self, request):

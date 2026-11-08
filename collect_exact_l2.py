@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Collect native CEX L2 snapshots and compute executable off-ramp curves.
 
-Public-book adapters include BtcTurk, Mercado Bitcoin, Indodax, VALR,
+Public-book adapters include BtcTurk, Foxbit, Mercado Bitcoin, Indodax, VALR,
 Bitkub, Bitso, and Binance (disabled by default after HTTP 451). All configured
 pairs have the dollar stablecoin as base, so an off-ramp sale consumes bids.
 Raw JSON, request metadata, hashes, threshold depth, and fixed-flow execution
@@ -46,6 +46,8 @@ def endpoint(row):
                                                           "limit": limit}
     if venue == "mercadobitcoin":
         return f"https://api.mercadobitcoin.net/api/v4/{pair}/orderbook", {"limit": limit}
+    if venue == "foxbit":
+        return f"https://api.foxbit.com.br/rest/v3/markets/{pair}/orderbook", {"depth": limit}
     if venue == "indodax":
         return f"https://indodax.com/api/depth/{pair}", {}
     if venue == "valr":
@@ -73,7 +75,7 @@ def normalize_book(venue, payload, *, expected_pair=None):
         if payload.get("success") is not True:
             raise ValueError(f"BtcTurk API error: {payload.get('message')}")
         return _levels(payload["data"]["bids"]), _levels(payload["data"]["asks"])
-    if venue == "mercadobitcoin":
+    if venue in ("mercadobitcoin", "foxbit"):
         return _levels(payload["bids"]), _levels(payload["asks"])
     if venue == "indodax":
         return _levels(payload["buy"]), _levels(payload["sell"])
@@ -281,6 +283,8 @@ def exchange_timestamp(venue, payload):
         value = payload.get("data", {}).get("timestamp")
         if value is not None:
             return datetime.fromtimestamp(float(value) / 1000, timezone.utc).isoformat()
+    elif venue == "foxbit":
+        return datetime.fromtimestamp(int(payload["timestamp"]) / 1000, timezone.utc).isoformat()
     elif venue == "mercadobitcoin":
         value = payload.get("timestamp")
         if value is not None:

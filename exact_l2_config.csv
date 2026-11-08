@@ -3,7 +3,8 @@ binance,USDTTRY,TRY,USDT,base,false,5000,Disabled after HTTP451 access restricti
 binance,USDTBRL,BRL,USDT,base,false,5000,Disabled after HTTP451 access restriction; missing historical Binance books remain missing
 binance,USDTIDR,IDR,USDT,base,false,5000,Disabled after HTTP451; native symbol was never verified; not treated as an observed market
 btcturk,USDTTRY,TRY,USDT,base,true,100,Independent TRY venue; new forward snapshots only; not a Binance backfill
-mercadobitcoin,USDT-BRL,BRL,USDT,base,true,100,Independent BRL venue; new forward snapshots only; not a Binance backfill
+mercadobitcoin,USDT-BRL,BRL,USDT,base,false,100,Paused after repeated HTTP 403; preserve the Mercado Bitcoin series and its gaps
+foxbit,usdtbrl,BRL,USDT,base,true,100,Independent BRL venue; forward snapshots only
 indodax,usdtidr,IDR,USDT,base,true,0,Independent IDR venue; new forward snapshots only; not a Binance backfill
 valr,USDTZAR,ZAR,USDT,base,true,1000,Existing native ZAR series retained
 bitkub,usdt_thb,THB,USDT,base,true,1000,Existing native THB series retained; v3 sizes are base units
